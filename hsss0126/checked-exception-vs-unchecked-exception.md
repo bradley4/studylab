@@ -8,18 +8,48 @@
 ![Exception](exception.png)
 
 
-### CheckedException
+## CheckedException
 - `RuntimeException` 의 하위클래스가 아닌 모든 예외가 `CheckedException` 에 속한다.
 - 컴파일 단계에서 예외처리를 확인하기 때문에 **반드시 예외처리**를 해야 한다.
 - 명시적 예외처리를 통해 런타임 시점에서 발생된 예외에 대한 복구가 가능하기 때문에 기본적으로 트랜잭션이 Rollback 되지 않는다. 
 - 주로 JVM 외부와 통신 시 발생한다. 
+```java
+/**
+ * method signature 에 IOException 을 추가하여 예외처리
+ * addExceptionToMethodSignature 를 호출한 상위객체에게 예외처리 위임
+ */
+public String addExceptionToMethodSignature(BufferedReader reader) throws IOException {
+    String line = reader.readLine();
+    return line;
+}
 
+/**
+ * try-catch 로 감싸 예외처리
+ * surroundWithTryCatch 메소드 내부에서 예외처리
+ */
+public String surroundWithTryCatch(BufferedReader reader) {
+    try {
+        String line = reader.readLine();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return line;
+}
+```
 
-### UnCheckedException
+## UnCheckedException
 - `RuntimeException` 과 그 하위클래스인 예외가 `UnCheckedException` 에 속한다.
 - 예외의 발생이 예측 불가능하기 때문에 컴파일 단계에서 확인하지 않는다.
 - 컴파일 단계에서 예외처리가 보장되지 않기 때문에 예외 발생 시 트랜잭션이 Rollback 된다. 
-
+```java
+/**
+ * NullPointerException 이 발생하도록 소스를 작성하였지만 컴파일 단계에서 예외처리를 강제하지 않음
+ */
+public String getUserName() {
+    User user = null;
+    return user.getUserName();
+}
+```
 ### Rollback 예시
 ```java
 @Entity
@@ -79,7 +109,6 @@ public class UserService {
 
 ### 결론
 - CheckedException 이 발생되는 경우 트랜잭션 Rollback 은 수행되지 않는 것을 인지해야 한다.
-- 사용자 정의 Exception 을 생성하는 시점에 아래 내용을 고려해야 한다. 
 - 사용자 정의 Exception 을 생성하는 시점에 아래 내용을 고려해야 한다. 
   1. 예외 발생이 충분히 예측 가능한지?
   2. 예외가 발생하더라도 트랜잭션이 Commit 되어야 하는지?
