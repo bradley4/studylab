@@ -50,7 +50,8 @@ public String getUserName() {
     return user.getUserName();
 }
 ```
-### Rollback 예시
+## Rollback 예시
+### CheckedException 발생
 ```java
 @Entity
 public class User {
@@ -79,6 +80,7 @@ public class UserService {
 - 실제로는 의도와는 다르게 트랜잭션이 Commit 되면서 user 는 DB에 저장된다.
 - 의도한대로 동작하도록 작성하려면 아래와 같이 UnCheckedException 을 발생시켜야 트랜잭션이 Rollback 된다.
 
+### UnCheckedException 발생
 ```java
 @Service
 public class UserService {
@@ -95,7 +97,7 @@ public class UserService {
 }    
 ```
 
-#### 트랜잭션 Rollback 범위 지정
+### 트랜잭션 Rollback 범위 지정
 - @Transactional 에 rollbackFor 옵션을 지정하지 않는 경우 기본적으로 스프링은 아래와 같이 설정하여 관리한다.
 ```java
 @Transactional(rollbackFor = {RuntimeException.class, Error.class})
@@ -110,8 +112,6 @@ public class UserService {
 ### 결론
 - CheckedException 이 발생되는 경우 트랜잭션 Rollback 은 수행되지 않는 것을 인지해야 한다.
 - 사용자 정의 Exception 을 생성하는 시점에 아래 내용을 고려해야 한다. 
-  1. 예외 발생이 충분히 예측 가능한지?
-  2. 예외가 발생하더라도 트랜잭션이 Commit 되어야 하는지?
-  3. 컴파일 단계에서 예외처리를 확인할 필요가 없는지?
-  4. 예외 발생 시 트랜잭션이 Rollback 되어야 하는지?
+  1. 예외 발생이 충분히 예측 가능하여 컴파일 단계에서 예외처리를 확인해야 한다면 Exception 클래스 상속
+  2. 예외 발생 시 트랜잭션이 Rollback 되어야 한다면 RuntimeException 클래스 상속
 
